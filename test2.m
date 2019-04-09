@@ -18,7 +18,10 @@ sample = [117.743518847178,115.866290578128,255;...
     174.533230647483,125.547036726468,163.252143048791]; 
 
 % vectorize this sample:
-input = reshape(sample, [9, 1])
+input = reshape(sample, [9, 1]);
+
+% normalize the input ??
+input = input ./ sum(input);
 
 % declare the initial value of Weights vector. w0, w1, ... w9
 w = 0.01;
