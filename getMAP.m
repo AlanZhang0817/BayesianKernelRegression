@@ -1,10 +1,11 @@
 % X =[x1, x2, x3 ..., x_N]', r: bandwidth, W = [w0, w1, w2, ..., w_N]'
-function [W_MAP, variance0_MAP, Variance_MAP, variance_unknown] = getMAP(X, W, variance_unknown, Variance_prior, variance0_prior, r, eta)
+function [W_MAP, variance0_MAP, Variance_MAP, variance_unknown] = getMAP(X, W, ...
+    variance_unknown, Variance_prior, variance0_prior, r, eta)
 
 numSamples = size(X, 1);
 m = sum(X) / numSamples;
 tt = 1;
-while tt < 100
+while tt < 10000
    tt = tt + 1;
    
    Y = getYVec(W, X, r);
@@ -37,8 +38,8 @@ while tt < 100
    variance0_prior = 1 / (W(1, :) - m) ^ 2;
    
 
-   W(2 : end , :) = W(2 : end , :) - eta * del_L_W_exclude;
-   W(1, :) = W(1, :) - eta * del_L_W_0;
+   W(2 : end , :) = W(2 : end , :) + eta * del_L_W_exclude;
+   W(1, :) = W(1, :) + eta * del_L_W_0;
    
    
 %    Variance_prior = Variance_prior - eta * del_Variance_prior;
