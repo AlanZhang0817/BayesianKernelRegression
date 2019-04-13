@@ -60,7 +60,7 @@ while tt < 10000
    end
    
 end
-tt
+tt;
 W_MAP = W;
 Variance_MAP = Variance_prior;
 variance0_MAP = variance0_prior;
