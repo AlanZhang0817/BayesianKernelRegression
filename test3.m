@@ -1,15 +1,16 @@
 % initialization 
-kernelsize = 9;
+kernelsize = 25;
 kRadius    = (sqrt(kernelsize) - 1) / 2;
 r          = 1.2;   % declare the brandwidth of the Gaussian kernel
 eta        = 0.001; % declare the step size eta
+h          = 0.2;
 
 img = double(imread('lena.jpg'));  % read in image
 sigma      = 30;   % standard deviation of noise added on the image
 randn('state', 0);
 y = round0_255(img + randn(size(img)) * sigma); % generate noisy image
 
-% y = y(100 : 300, 200 : 400);
+% y = y(1 : 5, 1 : 5);
 % imshow(uint8(y));
 
 %%
@@ -30,20 +31,24 @@ end
 
 resMatrix = reshape(resMatrix, [size(padImg, 1) - 2 * kRadius, size(padImg, 2) - 2 * kRadius]);
 
-% finalWeights = cell(1, (size(y, 1) * size(y, 2)));
-% ii = 1;
-% for row = 1 + kRadius : size(resMatrix, 1) -kRadius
-%     for col = 1 + kRadius : size(resMatrix, 2) -kRadius
-%         weights = zeros(kernelsize + 1, 1);
-%         for offsetI = row - kRadius : row + kRadius
-%             for offsetJ = col - kRadius : col + kRadius
-%                 weights = weights + resMatrix{offsetI, offsetJ};
-%             end
-%         end
-%         finalWeights(ii) = {weights / kernelsize};
-%         ii = ii + 1;
-%     end
-% end
+finalWeights = cell(1, (size(y, 1) * size(y, 2)));
+weights = getWeights(sqrt(kernelsize), h) / sum(sum(getWeights(sqrt(kernelsize), h)));
+weights = reshape(weights, [1, kernelsize]);
+ii = 1;
+for row = 1 + kRadius : size(resMatrix, 1) -kRadius
+    for col = 1 + kRadius : size(resMatrix, 2) -kRadius
+        weights_sum = zeros(kernelsize + 1, 1);
+        jj = 1;
+        for offsetI = row - kRadius : row + kRadius
+            for offsetJ = col - kRadius : col + kRadius
+                weights_sum = weights_sum + weights(jj) * resMatrix{offsetI, offsetJ};
+                jj = jj + 1;
+            end
+        end
+        finalWeights(ii) = {weights_sum};
+        ii = ii + 1;
+    end
+end
 
 finalWeightsII = 1;
 predictions = zeros(1, size(y, 1) * size(y, 2));
