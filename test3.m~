@@ -8,9 +8,9 @@ h          = 0.2;
 img = double(imread('lena.jpg'));  % read in image
 sigma      = 30;   % standard deviation of noise added on the image
 randn('state', 0);
-y = round0_255(img + randn(size(img)) * sigma); % generate noisy image
+y = round0_255(img + randn(size(img)) * sigma) ./ 255; % generate noisy image
 
-y = y(100 : 300, 200 : 400);
+y = y(200 : 400, 200 : 400);
 imshow(uint8(y));
 
 %%
@@ -31,37 +31,80 @@ end
 
 resMatrix = reshape(resMatrix, [size(padImg, 1) - 2 * kRadius, size(padImg, 2) - 2 * kRadius]);
 
-finalWeights = cell(1, (size(y, 1) * size(y, 2)));
+% revise starts here
+predict_y_from_all_W = zeros(1, (size(y, 1) * size(y, 2))); % the predictions of y for the same pixcel
 weights = getWeights(sqrt(kernelsize), h) / sum(sum(getWeights(sqrt(kernelsize), h)));
 weights = reshape(weights, [1, kernelsize]);
 ii = 1;
-for row = 1 + kRadius : size(resMatrix, 1) -kRadius
-    for col = 1 + kRadius : size(resMatrix, 2) -kRadius
-        weights_sum = zeros(kernelsize, 1);
-        jj = 1;
-        for offsetI = row - kRadius : row + kRadius
-            for offsetJ = col - kRadius : col + kRadius
-                weights_sum = weights_sum + weights(jj) * resMatrix{offsetI, offsetJ};
+
+for row = 1 + 2 * kRadius : size(padImg, 1) - 2 * kRadius
+   for col = 1 + 2 * kRadius : size(padImg, 2) - 2 * kRadius
+       predicts_y = zeros(kernelsize, 1);
+       jj = 1;
+       for offsetI = row - kRadius : row + kRadius
+           for offsetJ = col - kRadius : col + kRadius 
+                frame = padImg(offsetI - kRadius : offsetI + kRadius, offsetJ - kRadius : offsetJ + kRadius);
+                input = reshape(frame, [kernelsize, 1]);
+                Y = getYVec(resMatrix{offsetI - kRadius, offsetJ - kRadius}, input, r);
+                predicts_y(jj, 1) = min(max(Y(kernelsize - jj + 1, 1), 0), 255);
                 jj = jj + 1;
-            end
-        end
-        finalWeights(ii) = {weights};
-        ii = ii + 1;
-    end
+           end
+       end
+       predict_y_from_all_W(ii) = weights * predicts_y;
+       ii = ii + 1;
+   end
 end
+predictions = reshape(predict_y_from_all_W, size(y));
 
-finalWeightsII = 1;
-predictions = zeros(1, size(y, 1) * size(y, 2));
-for indexii = 1 + 2 * kRadius : size(padImg, 1) - 2 * kRadius
-    for indexjj = 1 + 2 * kRadius : size(padImg, 2) - 2 * kRadius
-        frame = padImg(indexii - kRadius : indexii + kRadius, indexjj - kRadius : indexjj + kRadius);
-        input = reshape(frame, [kernelsize, 1]);
-        Y = getYVec(finalWeights{finalWeightsII}, input, r);
-        predictions(finalWeightsII) = Y(ceil(size(Y, 1) / 2));
-        finalWeightsII = finalWeightsII + 1;
-    end
-end
+% for row = 1 + kRadius : size(resMatrix, 1) - kRadius
+%     for col = 1 + kRadius : size(resMatrix, 2) - kRadius
+%         predicts_y = zeros(kernelsize, 1);
+%         jj = 1;
+%         for offsetI = row - kRadius : row + kRadius
+%             for offsetJ = col - kRadius : col + kRadius
+%                 frame = padImg(offsetI - kRadius : offsetI + kRadius, offsetJ - kRadius : offsetJ + kRadius);
+%                 input = reshape(frame, [kernelsize, 1]);
+%                 Y = getYVec(resMatrix{offsetI, offsetJ}, input, r);
+%                 predicts_y(jj, 1) = Y(kernelsize - jj, 1);
+%                 jj = jj + 1;
+%             end
+%         end
+%         predict_y_from_all_W(ii) = weights * predicts_y;
+%         ii = ii + 1;
+%     end
+% end
 
-predictions = reshape(predictions, size(y));
+% finalWeights = cell(1, (size(y, 1) * size(y, 2)));
+% weights = getWeights(sqrt(kernelsize), h) / sum(sum(getWeights(sqrt(kernelsize), h)));
+% weights = reshape(weights, [1, kernelsize]);
+% ii = 1;
+% for row = 1 + kRadius : size(resMatrix, 1) -kRadius
+%     for col = 1 + kRadius : size(resMatrix, 2) -kRadius
+%         weights_sum = zeros(kernelsize + 1, 1);
+%         jj = 1;
+%         for offsetI = row - kRadius : row + kRadius
+%             for offsetJ = col - kRadius : col + kRadius
+%                 weights_sum = weights_sum + weights(jj) * resMatrix{offsetI, offsetJ};
+%                 jj = jj + 1;
+%             end
+%         end
+%         finalWeights(ii) = {weights_sum};
+%         ii = ii + 1;
+%     end
+% end
+
+% finalWeightsII = 1;
+% predictions = zeros(1, size(y, 1) * size(y, 2));
+% for indexii = 1 + 2 * kRadius : size(padImg, 1) - 2 * kRadius
+%     for indexjj = 1 + 2 * kRadius : size(padImg, 2) - 2 * kRadius
+%         frame = padImg(indexii - kRadius : indexii + kRadius, indexjj - kRadius : indexjj + kRadius);
+%         input = reshape(frame, [kernelsize, 1]);
+%         Y = getYVec(finalWeights{finalWeightsII}, input, r);
+%         predictions(finalWeightsII) = Y(ceil(size(Y, 1) / 2));
+%         finalWeightsII = finalWeightsII + 1;
+%     end
+% end
+% 
+% predictions = reshape(predictions, size(y));
 %%
-imshow([uint8(y) uint8(predictions)], []);
+imshow([uint8(y)  uint8(predictions)], []);
