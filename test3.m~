@@ -1,18 +1,18 @@
 % initialization 
 kernelsize = 9;
 kRadius    = (sqrt(kernelsize) - 1) / 2;
-r          = 1.2;   % declare the brandwidth of the Gaussian kernel
+r          = 1.2;   % declare the brandwidth of the RBF kernel
 eta        = 0.001; % declare the step size eta
-h          = 0.2;
-
+h          = 0.5;   % weights 
+sigma      = 100;   % standard deviation of noise added on the image
 img = double(imread('lena.jpg'));  % read in image
-sigma      = 30;   % standard deviation of noise added on the image
 randn('state', 0);
-y = round0_255(img + randn(size(img)) * sigma) ./ 255; % generate noisy image
+y = round0_255(img + randn(size(img)) * sigma); % generate noisy image
 
-y = y(200 : 400, 200 : 400);
-imshow(uint8(y));
+% y = y(200 : 400, 200 : 400);
+% imshow(uint8(y));
 
+classical_kernel_filtering = regular_kernel(kernelsize, y, h);
 %%
 padImg = padding(kernelsize, y); % pad image based on the size of kernel
 
@@ -107,4 +107,11 @@ predictions = reshape(predict_y_from_all_W, size(y));
 % 
 % predictions = reshape(predictions, size(y));
 %%
-imshow([uint8(y)  uint8(predictions)], []);
+imshow([uint8(y)  uint8(predictions) uint8(classical_kernel_filtering)], []);
+
+org_noise = immse(y, predictions);
+prediction_org = immse(img(200 : 400, 200 : 400), predictions);
+classi_org = immse(img(200 : 400, 200 : 400), classical_kernel_filtering);
+disp("The original vs noise mse is " + org_noise);
+disp("The original vs prediction mse is " + prediction_org);
+disp("The original vs Gaussian Filtering is" + classi_org);
