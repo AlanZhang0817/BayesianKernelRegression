@@ -5,7 +5,7 @@ function [W_MAP, variance0_MAP, Variance_MAP, variance_unknown] = getMAP(X, W, .
 numSamples = size(X, 1);
 m = sum(X) / numSamples;
 tt = 1;
-while tt < 10000
+while tt < 100
    tt = tt + 1;
    
    Y = getYVec(W, X, r);
@@ -49,8 +49,8 @@ while tt < 10000
    variance_unknown = sum((Y - X) .^ 2) / (numSamples - 1);
     
    breakF = false;
-   for i = 1 : numSamples + 1
-       if abs(W(i, :)) < 0.01
+   for i = 1 : numSamples 
+       if abs(del_L_W_exclude(i, :)) < 0.01
            breakF = true;
        end
    end
