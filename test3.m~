@@ -3,16 +3,16 @@ kernelsize = 9;
 kRadius    = (sqrt(kernelsize) - 1) / 2;
 r          = 1.2;   % declare the brandwidth of the RBF kernel
 eta        = 0.001; % declare the step size eta
-h          = 1;   % weights 
-sigma      = 20;   % standard deviation of noise added on the image
+h          = 0.5;   % weights 
+sigma      = 0;   % standard deviation of noise added on the image
 img = double(imread('lena.jpg'));  % read in image
 randn('seed', 0);
 y = round0_255(img + randn(size(img)) * sigma); % generate noisy image
 
-imshow(uint8(y), []);
+% imshow(uint8(y), []);
 
-y = y(200 : 400, 200 : 400);
-img = img(200 : 400, 200 : 400);
+% y = y(20 : 40, 20 : 40);
+% img = img(20 : 40, 20 : 40);
 %imshow(uint8(y));
 
 classical_kernel_filtering = regular_kernel(kernelsize, y, h);
@@ -30,6 +30,7 @@ for row = 1 + kRadius : size(padImg, 1) - kRadius
         resMatrix(index) = {W_MAP};
         index = index + 1;
     end
+    disp("learning at row : " + row);
 end
 
 resMatrix = reshape(resMatrix, [size(padImg, 1) - 2 * kRadius, size(padImg, 2) - 2 * kRadius]);
@@ -56,6 +57,7 @@ for row = 1 + 2 * kRadius : size(padImg, 1) - 2 * kRadius
        predict_y_from_all_W(ii) = weights * predicts_y;
        ii = ii + 1;
    end
+   disp("predicting at row : " + row);
 end
 predictions = reshape(predict_y_from_all_W, size(y));
 

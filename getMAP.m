@@ -50,7 +50,7 @@ while tt < 100
     
    breakF = false;
    for i = 1 : numSamples 
-       if abs(del_L_W_exclude(i, :)) < 0.01
+       if abs(W(i, :)) > 2
            breakF = true;
        end
    end

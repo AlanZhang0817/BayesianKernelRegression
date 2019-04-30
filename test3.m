@@ -1,10 +1,10 @@
 % initialization 
-kernelsize = 9;
+kernelsize = 25;
 kRadius    = (sqrt(kernelsize) - 1) / 2;
 r          = 1.2;   % declare the brandwidth of the RBF kernel
 eta        = 0.001; % declare the step size eta
 h          = 1;   % weights 
-sigma      = 20;   % standard deviation of noise added on the image
+sigma      = 100;   % standard deviation of noise added on the image
 img = double(imread('lena.jpg'));  % read in image
 randn('seed', 0);
 y = round0_255(img + randn(size(img)) * sigma); % generate noisy image
