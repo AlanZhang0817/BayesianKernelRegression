@@ -1,5 +1,7 @@
 # BayesianKernelRegression
 
+Please check report.pdf for the description and result of this project.
+
 This project focuses on image denoising task with Bayesian Approach. Specifically, the idea of kernel regression is implemented. 
 
 high-level program flow:
